@@ -1,6 +1,6 @@
 # novastack
 
-> **Version:** 0.1.0 | **Last Updated:** 2026-03-15 | **Total Commits:** 3
+> **Version:** 0.1.0 | **Last Updated:** 2026-03-15 | **Total Commits:** 4
 
 ## 🚀 Project Overview
 
@@ -45,15 +45,15 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## 📝 Latest Activity
 
-**Most Recent Commit:**
-`Initial commit`
+**Most Recent Commit:** 
+\`86d13ea - Merge pull request #1 from drewsephski/feature/nextjs-app-clean (Drew, 11 seconds ago)\`
 
 ## 🧰 Available Scripts
 
-- `bun dev` - Start development server
-- `bun build` - Build for production
-- `bun start` - Start production server
-- `bun lint` - Run ESLint
+- \`bun dev\` - Start development server
+- \`bun build\` - Build for production
+- \`bun start\` - Start production server
+- \`bun lint\` - Run ESLint
 
 ## 📚 Learn More
 
