@@ -1,0 +1,150 @@
+name: Update README
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Get project info
+      id: project-info
+      run: |
+        # Get latest commit info
+        LATEST_COMMIT=$(git log -1 --pretty=format:"%h - %s (%an, %ar)")
+        echo "latest_commit=$LATEST_COMMIT" >> $GITHUB_OUTPUT
+        
+        # Get total commits
+        TOTAL_COMMITS=$(git rev-list --count HEAD)
+        echo "total_commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+        
+        # Get last update date
+        LAST_UPDATE=$(git log -1 --pretty=format:"%ad" --date=short)
+        echo "last_update=$LAST_UPDATE" >> $GITHUB_OUTPUT
+        
+        # Get package.json info
+        if [ -f package.json ]; then
+          PROJECT_NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        fi
+        
+        # Count dependencies
+        if [ -f package.json ]; then
+          DEPS=$(node -p "Object.keys(require('./package.json').dependencies || {}).length")
+          DEV_DEPS=$(node -p "Object.keys(require('./package.json').devDependencies || {}).length")
+          echo "dependencies=$DEPS" >> $GITHUB_OUTPUT
+          echo "dev_dependencies=$DEV_DEPS" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Update README
+      run: |
+        # Create updated README content
+        cat > README.md << 'EOF'
+        # ${{ steps.project-info.outputs.project_name || 'Novastack' }}
+
+        > **Version:** ${{ steps.project-info.outputs.version || '0.1.0' }} | **Last Updated:** ${{ steps.project-info.outputs.last_update }} | **Total Commits:** ${{ steps.project-info.outputs.total_commits }}
+
+        ## 🚀 Project Overview
+
+        This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+        ## 📊 Project Statistics
+
+        - **Dependencies:** ${{ steps.project-info.outputs.dependencies || '0' }}
+        - **Dev Dependencies:** ${{ steps.project-info.outputs.dev_dependencies || '0' }}
+        - **Node.js:** Next.js 16.1.6 with React 19.2.3
+        - **Package Manager:** Bun
+
+        ## 🛠️ Tech Stack
+
+        - **Framework:** Next.js 16.1.6
+        - **Runtime:** React 19.2.3
+        - **Language:** TypeScript
+        - **Styling:** Tailwind CSS v4
+        - **AI Integration:** Vercel AI SDK with OpenRouter
+        - **Database:** PostgreSQL with Drizzle ORM
+        - **Package Manager:** Bun
+
+        ## 🏃‍♂️ Getting Started
+
+        First, run the development server:
+
+        ```bash
+        bun dev
+        # or
+        npm run dev
+        # or
+        yarn dev
+        # or
+        pnpm dev
+        ```
+
+        Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+        You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+        This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+        ## 📝 Latest Activity
+
+        **Most Recent Commit:** 
+        \`${{ steps.project-info.outputs.latest_commit }}\`
+
+        ## 🧰 Available Scripts
+
+        - \`bun dev\` - Start development server
+        - \`bun build\` - Build for production
+        - \`bun start\` - Start production server
+        - \`bun lint\` - Run ESLint
+
+        ## 📚 Learn More
+
+        To learn more about Next.js, take a look at the following resources:
+
+        - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+        - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+        You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+        ## 🚀 Deploy on Vercel
+
+        The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+        Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+        ---
+        *This README is automatically updated after each commit and pull request.*
+        EOF
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add README.md
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "📝 Auto-update README with latest project info"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
